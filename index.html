@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Fajne Szyfry</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Dodatkowe style dla płynnych animacji i wyglądu klawiszy */
+        body {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .key-cap {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 3px 0 #cbd5e1;
+        }
+
+        .key-cap:active, .key-cap.active-source {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #94a3b8;
+        }
+
+        .key-cap.highlight-source {
+            background-color: #4f46e5;
+            color: #ffffff;
+            border-color: #4338ca;
+            box-shadow: 0 3px 0 #312e81;
+            transform: translateY(-2px);
+        }
+
+        .key-cap.highlight-left {
+            background-color: #d97706;
+            color: #ffffff;
+            border-color: #b45309;
+            box-shadow: 0 3px 0 #78350f;
+        }
+
+        .key-cap.highlight-right {
+            background-color: #059669;
+            color: #ffffff;
+            border-color: #047857;
+            box-shadow: 0 3px 0 #064e3b;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.25s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Nagłówek główny i nawigacja -->
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-30 border-b border-slate-800">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 gap-4">
+                <!-- Logo / Tytuł -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md shadow-indigo-500/30 shrink-0">
+                        <!-- Ikona kłódki / szyfru (SVG) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
+                            Super Fajne Szyfry
+                        </h1>
+                        <p class="text-xs text-slate-400 hidden sm:block">Tajne wiadomości &amp; kryptografia klawiaturowa</p>
+                    </div>
+                </div>
+
+                <!-- Główne zakładki nawigacji -->
+                <nav aria-label="Główna nawigacja" class="flex bg-slate-800/90 p-1.5 rounded-xl border border-slate-700/80 self-start sm:self-auto w-full sm:w-auto">
+                    <button id="main-tab-start" onclick="switchMainTab('start')" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Start
+                    </button>
+                    <button id="main-tab-kloneczek" onclick="switchMainTab('kloneczek')" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/50">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                        Szyfr Kloneczka
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Główna treść strony -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8">
+
+        <!-- ZAKŁADKA 1: START -->
+        <section id="view-start" class="fade-in">
+            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/70 border border-slate-200/80 p-8 sm:p-14 text-center max-w-2xl mx-auto mt-4 sm:mt-10 relative overflow-hidden">
+                <!-- Dekoracyjny akcent w tle -->
+                <div class="absolute -top-24 -right-24 w-48 h-48 bg-indigo-50 rounded-full blur-2xl opacity-80 pointer-events-none"></div>
+                <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-50 rounded-full blur-2xl opacity-80 pointer-events-none"></div>
+
+                <div class="relative z-10">
+                    <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-inner">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                    </div>
+
+                    <span class="inline-block px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-100 text-indigo-700 mb-4">
+                        Witaj w centrum szyfrów
+                    </span>
+
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
+                        Wybierz zakładkę powyżej!
+                    </h2>
+
+                    <p class="text-slate-600 text-base sm:text-lg leading-relaxed mb-8 max-w-lg mx-auto">
+                        Wybierz zakładkę powyżej, aby rozpocząć zabawę z szyframi, poznać sekretne zasady kodowania i przetłumaczyć swoją pierwszą tajną wiadomość.
+                    </p>
+
+                    <button onclick="switchMainTab('kloneczek')" class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white font-semibold text-sm sm:text-base transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer">
+                        <span>Przejdź do Szyfru Kloneczka</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ZAKŁADKA 2: SZYFR KLONECZKA -->
+        <section id="view-kloneczek" class="hidden fade-in space-y-6">
+
+            <!-- Nagłówek sekcji i podzakładki -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2.5">
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Szyfr Kloneczka</h2>
+                        <span class="px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800">QWERTY</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-1">Szyfr przesunięcia oparty na sąsiednich klawiszach klawiatury oraz wielkości liter.</p>
+                </div>
+
+                <!-- Podzakładki: Instrukcja / Tłumacz -->
+                <div class="flex bg-slate-100 p-1.5 rounded-xl border border-slate-200/80 w-full sm:w-auto">
+                    <button id="sub-tab-instrukcja" onclick="switchSubTab('instrukcja')" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-white text-indigo-700 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        Instrukcja
+                    </button>
+                    <button id="sub-tab-tlumacz" onclick="switchSubTab('tlumacz')" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                        Tłumacz
+                    </button>
+                </div>
+            </div>
+
+            <!-- PODZAKŁADKA 2A: INSTRUKCJA -->
+            <div id="subview-instrukcja" class="fade-in space-y-6">
+
+                <!-- Wizualna klawiatura odniesienia -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5 sm:p-7">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 inline-flex items-center justify-center text-sm font-extrabold">1</span>
+                            Układ klawiatury (baza szyfru)
+                        </h3>
+                        <span class="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Najedź lub kliknij klawisz, aby zobaczyć sąsiadów</span>
+                    </div>
+
+                    <p class="text-sm text-slate-600 mb-5 leading-relaxed">
+                        W Szyfrze Kloneczka <strong>nie używamy polskich znaków</strong> (<code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-800 font-mono">ą, ć, ę, ł, ń, ó, ś, ź, ż</code> zamieniamy na <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-800 font-mono">a, c, e, l, n, o, s, z, z</code>). Liczy się dokładna kolejność liter w trzech rzędach klawiatury:
+                    </p>
+
+                    <!-- Interaktywna wizualizacja rzędów klawiatury w instrukcji -->
+                    <div id="instruction-keyboard" class="bg-slate-100/90 p-4 sm:p-6 rounded-2xl border border-slate-200 flex flex-col items-center gap-2.5 select-none overflow-x-auto">
+                        <!-- Generowane przez JS -->
+                    </div>
+
+                    <!-- Legenda do klawiatury instrukcji -->
+                    <div id="instruction-key-info" class="mt-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center text-sm text-slate-600">
+                        Kliknij dowolną literę powyżej, aby sprawdzić jej sąsiadów po lewej i po prawej stronie!
+                    </div>
+                </div>
+
+                <!-- Dwie kolumny: Odszyfrowywanie oraz Szyfrowanie -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                    <!-- Karta: Odszyfrowywanie -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5 sm:p-7 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2.5 mb-4">
+                                <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 inline-flex items-center justify-center text-sm font-extrabold">2</span>
+                                <h3 class="text-lg font-bold text-slate-900">Odszyfrowywanie (Szyfr &rarr; Tekst)</h3>
+                            </div>
+
+                            <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                                Czytając zaszyfrowaną wiadomość, patrzysz na <strong>wielkość każdej litery</strong>. To ona mówi Ci, w którą stronę przesunąć wzrok na klawiaturze:
+                            </p>
+
+                            <div class="space-y-3 mb-5">
+                                <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80">
+                                    <div class="font-bold text-emerald-900 text-sm flex items-center gap-2">
+                                        <span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-mono text-xs">mała litera</span>
+                                        <span>&rarr; bierzemy literę PO PRAWEJ</span>
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-emerald-800 mt-1.5">
+                                        Przykład: widzisz małe <strong class="font-mono bg-white px-1.5 py-0.5 rounded border border-emerald-200">s</strong> &rarr; na klawiaturze po prawej od <code class="font-mono">s</code> jest <strong class="font-mono bg-white px-1.5 py-0.5 rounded border border-emerald-200">d</strong>.
+                                    </p>
+                                </div>
+
+                                <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80">
+                                    <div class="font-bold text-amber-900 text-sm flex items-center gap-2">
+                                        <span class="px-2 py-0.5 rounded bg-amber-600 text-white font-mono text-xs">DUŻA LITERA</span>
+                                        <span>&larr; bierzemy literę PO LEWEJ</span>
+                                    </div>
+                                    <p class="text-xs sm:text-sm text-amber-800 mt-1.5">
+                                        Przykład: widzisz duże <strong class="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-200">U</strong> &rarr; na klawiaturze po lewej od <code class="font-mono">u</code> jest <strong class="font-mono bg-white px-1.5 py-0.5 rounded border border-amber-200">y</strong>.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
+                            <strong>Zawijanie krawędzi rzędu:</strong> Jeśli litera jest na końcu rzędu i przesuwasz się dalej, przechodzisz na drugi koniec tego samego rzędu (np. <code class="font-mono">p &rarr; q</code>, <code class="font-mono">l &rarr; a</code>, <code class="font-mono">m &rarr; z</code> oraz dla dużych: <code class="font-mono">Q &rarr; p</code>, <code class="font-mono">A &rarr; l</code>, <code class="font-mono">Z &rarr; m</code>).
+                        </div>
+                    </div>
+
+                    <!-- Karta: Szyfrowanie -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5 sm:p-7 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2.5 mb-4">
+                                <span class="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 inline-flex items-center justify-center text-sm font-extrabold">3</span>
+                                <h3 class="text-lg font-bold text-slate-900">Szyfrowanie (Tekst &rarr; Szyfr)</h3>
+                            </div>
+
+                            <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                                Szyfrowanie działa <strong>na odwrót</strong>! Dla każdej litery z Twojego hasła masz <strong>aż 2 możliwości zapisu</strong>:
+                            </p>
+
+                            <ul class="space-y-2.5 text-sm text-slate-700 mb-5">
+                                <li class="flex items-start gap-2.5">
+                                    <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">A</span>
+                                    <span>Zapisz sąsiada <strong>PO LEWEJ jako małą literę</strong> (przy odszyfrowaniu przesunie się w prawo na właściwą literę).</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">B</span>
+                                    <span>Albo zapisz sąsiada <strong>PO PRAWEJ jako DUŻĄ literę</strong> (przy odszyfrowaniu przesunie się w lewo na właściwą literę).</span>
+                                </li>
+                            </ul>
+
+                            <!-- Przykład dla słowa "hi" -->
+                            <div class="p-4 rounded-xl bg-indigo-50/80 border border-indigo-200/90">
+                                <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-800 mb-2">
+                                    Przykład szyfrowania słowa: <span class="font-mono text-sm bg-white px-2 py-0.5 rounded border border-indigo-200 text-indigo-950">hi</span>
+                                </div>
+                                <div class="text-xs text-slate-700 space-y-1 mb-3">
+                                    <p>&bull; Litera <strong class="font-mono">h</strong> ma sąsiadów <code class="font-mono">g</code> (lewo) i <code class="font-mono">j</code> (prawo) &rarr; wpisujemy <strong class="font-mono text-indigo-700">g</strong> lub <strong class="font-mono text-indigo-700">J</strong>.</p>
+                                    <p>&bull; Litera <strong class="font-mono">i</strong> ma sąsiadów <code class="font-mono">u</code> (lewo) i <code class="font-mono">o</code> (prawo) &rarr; wpisujemy <strong class="font-mono text-indigo-700">u</strong> lub <strong class="font-mono text-indigo-700">O</strong>.</p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-xs font-semibold text-slate-600">4 poprawne szyfry:</span>
+                                    <span class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200 font-mono font-bold text-sm text-indigo-700 shadow-xs">gu</span>
+                                    <span class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200 font-mono font-bold text-sm text-indigo-700 shadow-xs">gO</span>
+                                    <span class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200 font-mono font-bold text-sm text-indigo-700 shadow-xs">Ju</span>
+                                    <span class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200 font-mono font-bold text-sm text-indigo-700 shadow-xs">JO</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex justify-end">
+                            <button onclick="switchSubTab('tlumacz')" class="text-sm font-bold text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1.5 cursor-pointer">
+                                <span>Wypróbuj w Tłumaczu</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PODZAKŁADKA 2B: TŁUMACZ -->
+            <div id="subview-tlumacz" class="hidden fade-in space-y-6">
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-5 sm:p-7 space-y-6">
+
+                    <!-- Panel wyboru trybu (Szyfrowanie vs Odszyfrowywanie) -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">Wybierz kierunek działania</span>
+                            <div class="inline-flex bg-slate-100 p-1.5 rounded-xl border border-slate-200 w-full sm:w-auto">
+                                <button id="mode-encrypt" onclick="setCipherMode('encrypt')" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                    Szyfrowanie
+                                </button>
+                                <button id="mode-decrypt" onclick="setCipherMode('decrypt')" class="flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                                    </svg>
+                                    Odszyfrowywanie
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Opcje wariantu szyfrowania (widoczne tylko w trybie Szyfrowanie) -->
+                        <div id="encrypt-options-panel" class="flex flex-col sm:flex-row sm:items-end gap-3">
+                            <div>
+                                <label for="encrypt-variant" class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">
+                                    Wariant szyfrowania
+                                </label>
+                                <select id="encrypt-variant" onchange="handleVariantChange()" class="w-full sm:w-auto px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="random">Losowy (mieszane małe i DUŻE)</option>
+                                    <option value="lower">Tylko małe litery (przesunięcie w lewo)</option>
+                                    <option value="upper">Tylko DUŻE litery (przesunięcie w prawo)</option>
+                                </select>
+                            </div>
+
+                            <button id="reroll-btn" onclick="rerollEncryption()" class="px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-sm font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer" title="Wygeneruj inną losową kombinację szyfru">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Przelosuj wariant
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pola tekstowe: Wejście i Wyjście -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Pole wejściowe -->
+                        <div class="flex flex-col">
+                            <div class="flex items-center justify-between mb-2">
+                                <label id="input-label" for="cipher-input" class="text-sm font-bold text-slate-800">
+                                    Wpisz tekst do zaszyfrowania:
+                                </label>
+                                <button onclick="insertExample()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 underline cursor-pointer">
+                                    Wstaw przykład
+                                </button>
+                            </div>
+                            <textarea id="cipher-input" rows="5" oninput="processTranslation()" placeholder="Wpisz swoją wiadomość tutaj..." class="w-full rounded-2xl border border-slate-300 bg-slate-50/60 p-4 font-mono text-base text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-y"></textarea>
+                            <div class="flex items-center justify-between mt-2 text-xs text-slate-500">
+                                <span id="polish-notice">Polskie znaki (ą, ć, ę...) zostaną automatycznie zamienione.</span>
+                                <span id="char-count">0 znaków</span>
+                            </div>
+                        </div>
+
+                        <!-- Pole wyjściowe -->
+                        <div class="flex flex-col">
+                            <div class="flex items-center justify-between mb-2">
+                                <label id="output-label" for="cipher-output" class="text-sm font-bold text-slate-800">
+                                    Zaszyfrowany wynik:
+                                </label>
+                                <span id="copy-feedback" class="text-xs font-bold text-emerald-600 opacity-0 transition-opacity duration-200">
+                                    Skopiowano do schowka!
+                                </span>
+                            </div>
+                            <textarea id="cipher-output" rows="5" readonly placeholder="Tutaj pojawi się wynik..." class="w-full rounded-2xl border border-slate-200 bg-slate-900 text-emerald-400 p-4 font-mono text-base focus:outline-none resize-y select-all"></textarea>
+                            
+                            <!-- Przyciski akcji -->
+                            <div class="flex flex-wrap items-center justify-end gap-2.5 mt-3">
+                                <button onclick="clearFields()" class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold transition-colors flex items-center gap-1.5 cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Wyczyść
+                                </button>
+                                <button onclick="swapTexts()" class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-semibold transition-colors flex items-center gap-1.5 cursor-pointer" title="Przenieś wynik do pola wejściowego i zmień tryb">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                    </svg>
+                                    Zamień i przetestuj
+                                </button>
+                                <button onclick="copyResult()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                    </svg>
+                                    Kopiuj wynik
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Podpowiedź wizualna klawiatury pod tłumaczem -->
+                    <div class="pt-5 border-t border-slate-100">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Podgląd układu klawiatury (podświetla ostatnią wpisaną literę)</span>
+                            <div class="flex items-center gap-3 text-xs">
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-amber-600 inline-block"></span> Lewo</span>
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-indigo-600 inline-block"></span> Wpisana</span>
+                                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-emerald-600 inline-block"></span> Prawo</span>
+                            </div>
+                        </div>
+                        <div id="translator-keyboard" class="bg-slate-100/80 p-4 rounded-2xl border border-slate-200/90 flex flex-col items-center gap-2 select-none overflow-x-auto">
+                            <!-- Generowane przez JS -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Stopka -->
+    <footer class="border-t border-slate-200/80 bg-white/80 backdrop-blur-xs py-5 mt-12">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+            <p class="font-semibold text-slate-700">Super Fajne Szyfry &bull; Szyfr Kloneczka</p>
+            <p>Układ klawiatury: QWERTY (bez polskich znaków diakrytycznych)</p>
+        </div>
+    </footer>
+
+    <!-- Logika aplikacji w JavaScript -->
+    <script>
+        // Definicja rzędów klawiatury zgodna z specyfikacją
+        const KEYBOARD_ROWS = [
+            ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+            ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
+            ['z', 'x', 'c', 'v', 'b', 'n', 'm']
+        ];
+
+        // Mapa polskich znaków diakrytycznych na podstawowe litery łacińskie
+        const POLISH_CHAR_MAP = {
+            'ą': 'a', 'ć': 'c', 'ę': 'e', 'ł': 'l', 'ń': 'n',
+            'ó': 'o', 'ś': 's', 'ź': 'z', 'ż': 'z',
+            'Ą': 'A', 'Ć': 'C', 'Ę': 'E', 'Ł': 'L', 'Ń': 'N',
+            'Ó': 'O', 'Ś': 'S', 'Ź': 'Z', 'Ż': 'Z'
+        };
+
+        // Stan aplikacji
+        let currentMode = 'encrypt'; // 'encrypt' | 'decrypt'
+        let randomSeedChoices = [];  // Zapamiętuje wylosowane kierunki dla pozycji znaków, aby pisanie nie migotało przy każdym klawiszu
+
+        // Pomocnicza funkcja znajdująca pozycję litery w układzie klawiatury
+        function findKeyPosition(char) {
+            const lower = char.toLowerCase();
+            for (let r = 0; r < KEYBOARD_ROWS.length; r++) {
+                const c = KEYBOARD_ROWS[r].indexOf(lower);
+                if (c !== -1) {
+                    return { row: r, col: c };
+                }
+            }
+            return null;
+        }
+
+        // Zwraca sąsiada po lewej i prawej stronie na klawiaturze (z zawijaniem rzędu)
+        function getNeighbors(char) {
+            const pos = findKeyPosition(char);
+            if (!pos) return null;
+            const rowArr = KEYBOARD_ROWS[pos.row];
+            const len = rowArr.length;
+            const leftIndex = (pos.col - 1 + len) % len;
+            const rightIndex = (pos.col + 1) % len;
+            return {
+                left: rowArr[leftIndex],
+                right: rowArr[rightIndex]
+            };
+        }
+
+        // Usuwa polskie znaki diakrytyczne
+        function normalizePolishChars(text) {
+            return text.replace(/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/g, match => POLISH_CHAR_MAP[match] || match);
+        }
+
+        // Funkcja szyfrująca pojedynczy znak
+        function encryptChar(char, variant, index) {
+            const neighbors = getNeighbors(char);
+            if (!neighbors) return char; // Cyfry, spacje, znaki interpunkcyjne bez zmian
+
+            let useLeftAsLower = true;
+
+            if (variant === 'lower') {
+                useLeftAsLower = true;
+            } else if (variant === 'upper') {
+                useLeftAsLower = false;
+            } else {
+                // Wariant losowy: używamy zapisanego wyboru dla danego indeksu lub losujemy nowy
+                if (randomSeedChoices[index] === undefined) {
+                    randomSeedChoices[index] = Math.random() < 0.5;
+                }
+                useLeftAsLower = randomSeedChoices[index];
+            }
+
+            if (useLeftAsLower) {
+                // Sąsiad po lewej jako mała litera (przy odszyfrowaniu przesunie się w prawo)
+                return neighbors.left.toLowerCase();
+            } else {
+                // Sąsiad po prawej jako DUŻA litera (przy odszyfrowaniu przesunie się w lewo)
+                return neighbors.right.toUpperCase();
+            }
+        }
+
+        // Funkcja odszyfrowująca pojedynczy znak
+        function decryptChar(char) {
+            const neighbors = getNeighbors(char);
+            if (!neighbors) return char;
+
+            const isUpperCase = char === char.toUpperCase() && char !== char.toLowerCase();
+
+            if (isUpperCase) {
+                // DUŻA litera -> bierzemy literę PO LEWEJ
+                return neighbors.left.toLowerCase();
+            } else {
+                // mała litera -> bierzemy literę PO PRAWEJ
+                return neighbors.right.toLowerCase();
+            }
+        }
+
+        // Główna funkcja tłumacząca tekst z pola wejściowego
+        function processTranslation() {
+            const inputEl = document.getElementById('cipher-input');
+            const outputEl = document.getElementById('cipher-output');
+            const charCountEl = document.getElementById('char-count');
+            const variant = document.getElementById('encrypt-variant').value;
+
+            const rawText = inputEl.value;
+            charCountEl.textContent = `${rawText.length} ${getPolishPlural(rawText.length, 'znak', 'znaki', 'znaków')}`;
+
+            // Zamieniamy polskie znaki na podstawowe
+            const normalizedText = normalizePolishChars(rawText);
+
+            // Dopasowujemy tablicę losowych wyborów do długości tekstu
+            if (randomSeedChoices.length > normalizedText.length) {
+                randomSeedChoices = randomSeedChoices.slice(0, normalizedText.length);
+            }
+
+            let result = '';
+            for (let i = 0; i < normalizedText.length; i++) {
+                const ch = normalizedText[i];
+                if (currentMode === 'encrypt') {
+                    result += encryptChar(ch, variant, i);
+                } else {
+                    result += decryptChar(ch);
+                }
+            }
+
+            outputEl.value = result;
+
+            // Podświetlenie ostatniej wpisanej litery na klawiaturze pod tłumaczem
+            highlightLastTypedKey(normalizedText);
+        }
+
+        // Odmiana słowa "znak" w języku polskim
+        function getPolishPlural(count, singular, plural2to4, plural5plus) {
+            if (count === 1) return singular;
+            const mod10 = count % 10;
+            const mod100 = count % 100;
+            if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+                return plural2to4;
+            }
+            return plural5plus;
+        }
+
+        // Przełączanie głównych zakładek: Start / Szyfr Kloneczka
+        function switchMainTab(tabName) {
+            const viewStart = document.getElementById('view-start');
+            const viewKloneczek = document.getElementById('view-kloneczek');
+            const btnStart = document.getElementById('main-tab-start');
+            const btnKloneczek = document.getElementById('main-tab-kloneczek');
+
+            if (tabName === 'start') {
+                viewStart.classList.remove('hidden');
+                viewKloneczek.classList.add('hidden');
+
+                btnStart.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm';
+                btnKloneczek.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/50';
+            } else {
+                viewStart.classList.add('hidden');
+                viewKloneczek.classList.remove('hidden');
+
+                btnKloneczek.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm';
+                btnStart.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 text-slate-300 hover:text-white hover:bg-slate-700/50';
+            }
+        }
+
+        // Przełączanie podzakładek w Szyfrze Kloneczka: Instrukcja / Tłumacz
+        function switchSubTab(subTabName) {
+            const subInstrukcja = document.getElementById('subview-instrukcja');
+            const subTlumacz = document.getElementById('subview-tlumacz');
+            const btnInstrukcja = document.getElementById('sub-tab-instrukcja');
+            const btnTlumacz = document.getElementById('sub-tab-tlumacz');
+
+            if (subTabName === 'instrukcja') {
+                subInstrukcja.classList.remove('hidden');
+                subTlumacz.classList.add('hidden');
+
+                btnInstrukcja.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-white text-indigo-700 shadow-sm';
+                btnTlumacz.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900';
+            } else {
+                subInstrukcja.classList.add('hidden');
+                subTlumacz.classList.remove('hidden');
+
+                btnTlumacz.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-white text-indigo-700 shadow-sm';
+                btnInstrukcja.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900';
+            }
+        }
+
+        // Ustawienie trybu tłumacza: Szyfrowanie / Odszyfrowywanie
+        function setCipherMode(mode) {
+            currentMode = mode;
+            const btnEncrypt = document.getElementById('mode-encrypt');
+            const btnDecrypt = document.getElementById('mode-decrypt');
+            const encryptOptions = document.getElementById('encrypt-options-panel');
+            const inputLabel = document.getElementById('input-label');
+            const outputLabel = document.getElementById('output-label');
+            const polishNotice = document.getElementById('polish-notice');
+            const inputEl = document.getElementById('cipher-input');
+
+            if (mode === 'encrypt') {
+                btnEncrypt.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm';
+                btnDecrypt.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900';
+                encryptOptions.classList.remove('hidden');
+                inputLabel.textContent = 'Wpisz tekst do zaszyfrowania:';
+                outputLabel.textContent = 'Zaszyfrowany wynik:';
+                polishNotice.textContent = 'Polskie znaki (ą, ć, ę...) zostaną automatycznie zamienione.';
+                inputEl.placeholder = 'Np. tajne haslo lub hi';
+            } else {
+                btnDecrypt.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 bg-emerald-600 text-white shadow-sm';
+                btnEncrypt.className = 'flex-1 sm:flex-initial px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900';
+                encryptOptions.classList.add('hidden');
+                inputLabel.textContent = 'Wpisz szyfrogram do odszyfrowania:';
+                outputLabel.textContent = 'Odszyfrowana wiadomość:';
+                polishNotice.textContent = 'mała litera = przesuń w prawo | DUŻA LITERA = przesuń w lewo';
+                inputEl.placeholder = 'Np. gO lub Ju lub JO';
+            }
+
+            processTranslation();
+        }
+
+        // Zmiana wariantu szyfrowania (Losowy / małe / DUŻE)
+        function handleVariantChange() {
+            const variant = document.getElementById('encrypt-variant').value;
+            const rerollBtn = document.getElementById('reroll-btn');
+
+            if (variant === 'random') {
+                rerollBtn.classList.remove('hidden');
+            } else {
+                rerollBtn.classList.add('hidden');
+            }
+            processTranslation();
+        }
+
+        // Przelosowanie wariantu szyfrowania
+        function rerollEncryption() {
+            randomSeedChoices = [];
+            processTranslation();
+        }
+
+        // Wstawienie przykładowego tekstu
+        function insertExample() {
+            const inputEl = document.getElementById('cipher-input');
+            if (currentMode === 'encrypt') {
+                inputEl.value = 'hi! Tajne haslo Kloneczka';
+            } else {
+                inputEl.value = 'gO! Ysujw gsakp LkpBwvzlS';
+            }
+            randomSeedChoices = [];
+            processTranslation();
+        }
+
+        // Wyczyszczenie pól
+        function clearFields() {
+            document.getElementById('cipher-input').value = '';
+            document.getElementById('cipher-output').value = '';
+            randomSeedChoices = [];
+            processTranslation();
+        }
+
+        // Zamiana wyniku na wejście i przełączenie trybu (szybki test w obie strony)
+        function swapTexts() {
+            const inputEl = document.getElementById('cipher-input');
+            const outputEl = document.getElementById('cipher-output');
+            const currentOutput = outputEl.value;
+            if (!currentOutput) return;
+
+            inputEl.value = currentOutput;
+            setCipherMode(currentMode === 'encrypt' ? 'decrypt' : 'encrypt');
+        }
+
+        // Kopiowanie wyniku do schowka (bezpieczne w środowisku iFrame)
+        function copyResult() {
+            const outputEl = document.getElementById('cipher-output');
+            if (!outputEl.value) return;
+
+            outputEl.select();
+            outputEl.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                const feedback = document.getElementById('copy-feedback');
+                feedback.classList.remove('opacity-0');
+                setTimeout(() => {
+                    feedback.classList.add('opacity-0');
+                }, 2000);
+            } catch (err) {
+                console.error('Nie udało się skopiować tekstu', err);
+            }
+        }
+
+        // Renderowanie wizualnej klawiatury dla Instrukcji oraz Tłumacza
+        function renderKeyboards() {
+            const instContainer = document.getElementById('instruction-keyboard');
+            const transContainer = document.getElementById('translator-keyboard');
+
+            KEYBOARD_ROWS.forEach((row, rowIndex) => {
+                // Rząd dla instrukcji
+                const instRowDiv = document.createElement('div');
+                instRowDiv.className = 'flex justify-center gap-1.5 sm:gap-2';
+                if (rowIndex === 1) instRowDiv.classList.add('sm:pl-4');
+                if (rowIndex === 2) instRowDiv.classList.add('sm:pl-10');
+
+                // Rząd dla tłumacza
+                const transRowDiv = document.createElement('div');
+                transRowDiv.className = 'flex justify-center gap-1 sm:gap-1.5';
+                if (rowIndex === 1) transRowDiv.classList.add('sm:pl-4');
+                if (rowIndex === 2) transRowDiv.classList.add('sm:pl-10');
+
+                row.forEach(letter => {
+                    // Klawisz w Instrukcji (interaktywny klik/hover)
+                    const instKey = document.createElement('button');
+                    instKey.type = 'button';
+                    instKey.dataset.key = letter;
+                    instKey.textContent = letter;
+                    instKey.className = 'inst-key key-cap w-8 h-10 sm:w-11 sm:h-12 rounded-xl bg-white border border-slate-300 font-mono font-bold text-sm sm:text-base text-slate-800 flex items-center justify-center cursor-pointer hover:border-indigo-400';
+                    instKey.addEventListener('click', () => inspectInstructionKey(letter));
+                    instKey.addEventListener('mouseenter', () => inspectInstructionKey(letter));
+                    instRowDiv.appendChild(instKey);
+
+                    // Klawisz w Tłumaczu (podgląd na żywo)
+                    const transKey = document.createElement('div');
+                    transKey.dataset.key = letter;
+                    transKey.textContent = letter;
+                    transKey.className = 'trans-key key-cap w-7 h-9 sm:w-9 sm:h-10 rounded-lg bg-white border border-slate-300 font-mono font-bold text-xs sm:text-sm text-slate-700 flex items-center justify-center';
+                    transRowDiv.appendChild(transKey);
+                });
+
+                instContainer.appendChild(instRowDiv);
+                transContainer.appendChild(transRowDiv);
+            });
+        }
+
+        // Podświetlanie sąsiadów w zakładce Instrukcja
+        function inspectInstructionKey(letter) {
+            const neighbors = getNeighbors(letter);
+            if (!neighbors) return;
+
+            document.querySelectorAll('.inst-key').forEach(el => {
+                el.classList.remove('highlight-source', 'highlight-left', 'highlight-right');
+                const k = el.dataset.key;
+                if (k === letter) {
+                    el.classList.add('highlight-source');
+                } else if (k === neighbors.left) {
+                    el.classList.add('highlight-left');
+                } else if (k === neighbors.right) {
+                    el.classList.add('highlight-right');
+                }
+            });
+
+            const infoBox = document.getElementById('instruction-key-info');
+            infoBox.innerHTML = `
+                Wybrana litera: <strong class="font-mono text-indigo-700 text-base px-1.5 py-0.5 bg-indigo-50 rounded">${letter}</strong> &nbsp;|&nbsp;
+                Po lewej: <strong class="font-mono text-amber-700 text-base px-1.5 py-0.5 bg-amber-50 rounded">${neighbors.left}</strong> (szyfr małą literą) &nbsp;|&nbsp;
+                Po prawej: <strong class="font-mono text-emerald-700 text-base px-1.5 py-0.5 bg-emerald-50 rounded">${neighbors.right}</strong> (szyfr DUŻĄ literą <strong class="font-mono text-emerald-800">${neighbors.right.toUpperCase()}</strong>)
+            `;
+        }
+
+        // Podświetlanie ostatniej wpisanej litery w zakładce Tłumacz
+        function highlightLastTypedKey(text) {
+            document.querySelectorAll('.trans-key').forEach(el => {
+                el.classList.remove('highlight-source', 'highlight-left', 'highlight-right');
+            });
+
+            if (!text) return;
+
+            // Szukamy ostatniej litery z układu QWERTY
+            for (let i = text.length - 1; i >= 0; i--) {
+                const ch = text[i];
+                const pos = findKeyPosition(ch);
+                if (pos) {
+                    const lower = ch.toLowerCase();
+                    const neighbors = getNeighbors(lower);
+
+                    document.querySelectorAll('.trans-key').forEach(el => {
+                        const k = el.dataset.key;
+                        if (k === lower) el.classList.add('highlight-source');
+                        else if (k === neighbors.left) el.classList.add('highlight-left');
+                        else if (k === neighbors.right) el.classList.add('highlight-right');
+                    });
+                    break;
+                }
+            }
+        }
+
+        // Inicjalizacja po załadowaniu strony
+        window.addEventListener('DOMContentLoaded', () => {
+            renderKeyboards();
+            // Domyślnie podświetlamy literę 'h' w instrukcji, aby od razu pokazać działanie przykładu "hi"
+            inspectInstructionKey('h');
+        });
+    </script>
+</body>
+</html>
